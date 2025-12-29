@@ -1,2 +1,5 @@
 # ignore the virtual environment
 env/
+
+#ignore experiment
+experiment/
