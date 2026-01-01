@@ -6,7 +6,7 @@ class CreateUser(BaseModel):
     last_name: str
     dob: date
     gender: str
-    phone: int
+    phone: str
     email: str
     password: str
     country: str
