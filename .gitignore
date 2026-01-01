@@ -3,3 +3,9 @@ env/
 
 #ignore experiment
 experiment/
+
+#ignore architecture
+ArchitectureAndDiagrams/
+
+# ignore pycache
+__pycache__/
