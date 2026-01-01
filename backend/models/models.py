@@ -12,7 +12,7 @@ class User(base):
     gender=Column(String(6))
     phone=Column(String(10))
     email=Column(String(50))
-    password=Column(String(50))
+    password=Column(String(255))
     country=Column(String(20))
     state=Column(String(20))
     city=Column(String(20))
@@ -20,7 +20,7 @@ class User(base):
 
 class UserHealthInfo(base):
     __tablename__='user_health_information'
-    user_health_info_id=Column(Integer, ForeignKey('user.user_id'), primary_key=True)
+    user_health_info_id=Column(Integer, ForeignKey('users.user_id'), primary_key=True)
     height=Column(Float)
     weight=Column(Float)
     blood_group=Column(String)
