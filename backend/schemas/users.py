@@ -34,3 +34,7 @@ class CreateUserHealthInfo(BaseModel):
     height: float
     weight: float
     blood_group: str
+
+class LoginUser(BaseModel):
+    email: str
+    password: str
