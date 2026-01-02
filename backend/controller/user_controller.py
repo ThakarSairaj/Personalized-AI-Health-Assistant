@@ -1,10 +1,11 @@
+# controller/user_controller.py
+
 from fastapi import APIRouter, status, Depends
-from pydantic import BaseModel
 from typing import Annotated
 from sqlalchemy.orm import Session
-from database_con.database import session, engine
-from models.models import User, UserHealthInfo
-from schemas.users import CreateUser, CreateUserHealthInfo
+from database_con.database import session
+from models.models import User
+from schemas.users import CreateUser
 from core.security import hash_password
 
 router=APIRouter()
