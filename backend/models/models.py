@@ -1,3 +1,5 @@
+# models/models.py
+
 from sqlalchemy import Boolean, Integer, Float, BIGINT, String, Column, ForeignKey, Date
 from database_con.database import base
 
@@ -11,7 +13,7 @@ class User(base):
     dob=Column(Date) #This need to change to the format('date-month-year')
     gender=Column(String(6))
     phone=Column(String(10))
-    email=Column(String(50))
+    email=Column(String(50), unique=True, index=True)
     password=Column(String(255))
     country=Column(String(20))
     state=Column(String(20))
