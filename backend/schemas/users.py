@@ -15,12 +15,12 @@ class CreateUser(BaseModel):
     city: str
 
     # This is for the date format in dd-mm-yyyy
-    @field_validator('dob', mode='before')
-    @classmethod
-    def parse_dob(cls, value):
-        if isinstance(value, str):
-            return datetime.strptime(value, "%d-%m-%Y").date()
-        return value
+    # @field_validator('dob', mode='before')
+    # @classmethod
+    # def parse_dob(cls, value):
+    #     if isinstance(value, str):
+    #         return datetime.strptime(value, "%d-%m-%Y").date()
+    #     return value
     
     @field_validator('gender')
     @classmethod
