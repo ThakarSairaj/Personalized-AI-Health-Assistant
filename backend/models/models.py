@@ -1,8 +1,8 @@
 # models/models.py
 
-from sqlalchemy import Boolean, Integer, Float, BIGINT, String, Column, ForeignKey, Date
+from sqlalchemy import Boolean, Integer, Float, BIGINT, String, Column, ForeignKey, Date, DateTime, Text
 from database_con.database import base
-
+from datetime import datetime
 
 
 class User(base):
@@ -26,3 +26,19 @@ class UserHealthInfo(base):
     height=Column(Float)
     weight=Column(Float)
     blood_group=Column(String)
+
+class MedicalReport(base):
+    __tablename__='medical_reports'
+
+    report_id=Column(Integer, primary_key=True, index=True)
+    user_id=Column(Integer, ForeignKey("users.user_id"), nullable=False, index=True)
+    chief_complaint=Column(String(255), nullable=False) #Single Sentence Description
+    symptoms=Column(Text, nullable=False)
+    duration=Column(String(50))
+    onset_type=Column(String(20)) #Like Suddent/Gradual
+    progression=Column(String(20)) #Improving/Worsening/Same
+    severity=Column(String(20)) # Mild/Moderate/Severe
+    reported_at=Column(DateTime, default=datetime.utcnow)
+    
+
+    
