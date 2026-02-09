@@ -42,3 +42,23 @@ export const submitHealthInfo = async (healthData) => {
   if (!res.ok) throw new Error(result.detail || 'Health info submission failed')
   return result
 }
+
+
+// ================== PDF Extractor ===============
+export const uploadPdf = async (file) => {
+  const formData = new FormData()
+  formData.append("file", file)
+
+  const res = await fetch("http://127.0.0.1:8000/pdf/extract", {
+    method: "POST",
+    body: formData,
+  })
+
+  const result = await res.json()
+
+  if (!res.ok) {
+    throw new Error(result.detail || "PDF extraction failed")
+  }
+
+  return result
+}
