@@ -43,5 +43,6 @@ def login(user: LoginUser, db: db_dependancy):
     
     return{
         "access_token": access_token,
-        "token_type":"bearer"
+        "token_type":"bearer",
+         "user_id": db_user.user_id
     }
