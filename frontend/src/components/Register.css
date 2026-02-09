@@ -1,0 +1,105 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap");
+
+.register-page {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(90deg, #e2e2e2, #c9d6ff);
+}
+
+/* Wide Card */
+.register-page .form-box {
+  width: 100%;
+  max-width: 900px;
+  background: #fff;
+  padding: 40px 50px;
+  border-radius: 24px;
+  box-shadow: 0 0 35px rgba(0, 0, 0, 0.2);
+}
+
+/* Title */
+.register-page h1 {
+  text-align: center;
+  font-size: 34px;
+  margin-bottom: 35px;
+  color: #333;
+}
+
+/* Grid layout */
+.register-page form {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px 30px;
+}
+
+/* Full width items */
+.register-page .full {
+  grid-column: span 2;
+}
+
+/* Inputs */
+.register-page .input-box input,
+.register-page .input-box select {
+  width: 100%;
+  padding: 14px 18px;
+  background: #f0f0f0;
+  border-radius: 10px;
+  border: none;
+  outline: none;
+  font-size: 15px;
+  color: #333;
+}
+
+.register-page .input-box input::placeholder {
+  color: #888;
+}
+
+/* Button */
+.register-page .btn {
+  grid-column: span 2;
+  height: 48px;
+  background: #7494ec;
+  border: none;
+  border-radius: 10px;
+  font-size: 17px;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.register-page .btn:hover {
+  background: #5f7fe0;
+}
+
+/* Bottom text */
+.register-page p {
+  grid-column: span 2;
+  text-align: center;
+  font-size: 14px;
+}
+
+.register-page p span {
+  color: #7494ec;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .register-page .form-box {
+    padding: 30px;
+  }
+
+  .register-page form {
+    grid-template-columns: 1fr;
+  }
+
+  .register-page .full,
+  .register-page .btn,
+  .register-page p {
+    grid-column: span 1;
+  }
+}
