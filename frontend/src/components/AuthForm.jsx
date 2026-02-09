@@ -10,11 +10,23 @@ const AuthForm = () => {
     password: '',
   })
 
-  const handleLogin = async (e) => {
-    e.preventDefault()
+const handleLogin = async (e) => {
+  e.preventDefault()
+
+  try {
     const res = await loginUser(loginData)
-    alert(res.message)
+
+    // 1️⃣ Store user_id
+    localStorage.setItem('user_id', res.user_id)
+
+    // 2️⃣ Redirect to Streamlit chat
+    window.location.href = `http://localhost:8501?user_id=${res.user_id}`
+
+  } catch (err) {
+    alert(err.message || "Login failed")
   }
+}
+
 
   return (
     <div className="container">
