@@ -27,6 +27,7 @@ class UserHealthInfo(base):
     weight=Column(Float)
     blood_group=Column(String)
 
+# This table is to generate the medical report in pdf for doctors to understand
 class MedicalReport(base):
     __tablename__='medical_reports'
 
@@ -40,5 +41,34 @@ class MedicalReport(base):
     severity=Column(String(20)) # Mild/Moderate/Severe
     reported_at=Column(DateTime, default=datetime.utcnow)
     
+
+class UploadedReport(base):
+    __tablename__ = 'uploaded_reports'
+
+    uploaded_report_id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey('users.user_id'), nullable=False)
+
+    report_type = Column(String(50))  # lab
+    report_date = Column(Date)
+    uploaded_at = Column(DateTime, default=datetime.utcnow)
+
+
+
+class ExtractedLabResult(base):
+    __tablename__ = 'extracted_lab_results'
+
+    lab_result_id = Column(Integer, primary_key=True)
+
+    uploaded_report_id = Column(Integer, ForeignKey('uploaded_reports.uploaded_report_id'))
+    user_id = Column(Integer, ForeignKey('users.user_id'))
+
+    test_name = Column(String(150))
+    test_value = Column(Float)
+    unit = Column(String(50))
+    reference_range = Column(String(100))
+    status = Column(String(20))
+    test_date = Column(Date)
+
+
 
     
