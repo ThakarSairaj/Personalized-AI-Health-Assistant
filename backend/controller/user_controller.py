@@ -20,7 +20,7 @@ db_dependency = Annotated[Session, Depends(get_db)]
 
 @router.post("/createUser/", status_code=status.HTTP_201_CREATED)
 def create_user(user: CreateUser, db: db_dependency):
-    # Check if email already exists
+   
     existing_user = db.query(User).filter(User.email == user.email).first()
     if existing_user:
         raise HTTPException(
@@ -28,10 +28,8 @@ def create_user(user: CreateUser, db: db_dependency):
             detail="Email already exists"
         )
     
-    # Hash password
     hashed_password = hash_password(user.password)
     
-    # Create new user
     db_user = User(
         first_name=user.first_name,
         last_name=user.last_name,
@@ -56,5 +54,4 @@ def create_user(user: CreateUser, db: db_dependency):
             detail="Email already exists"
         )
     
-    # Return user_id for frontend
     return {"user_id": db_user.user_id}

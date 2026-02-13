@@ -16,9 +16,7 @@ def save_report_to_db(
 ):
 
     try:
-        # ----------------------------
-        # 1️⃣ Parse Report Date
-        # ----------------------------
+      
         report_date_str = (
             extracted_json.get("patient_info", {})
             .get("report_date")
@@ -26,9 +24,7 @@ def save_report_to_db(
 
         report_date = _parse_date(report_date_str)
 
-        # ----------------------------
-        # 2️⃣ Create Uploaded Report
-        # ----------------------------
+    
         new_report = UploadedReport(
             user_id=user_id,
             report_type="lab",
@@ -36,11 +32,8 @@ def save_report_to_db(
         )
 
         db.add(new_report)
-        db.flush()  # Get uploaded_report_id
+        db.flush() 
 
-        # ----------------------------
-        # 3️⃣ Insert Lab Results
-        # ----------------------------
         lab_results = extracted_json.get("lab_results", [])
 
         if not isinstance(lab_results, list):
@@ -50,7 +43,7 @@ def save_report_to_db(
 
             test_name = test.get("test_name")
 
-            # Skip invalid or empty rows
+          
             if not test_name:
                 continue
 
@@ -82,9 +75,6 @@ def save_report_to_db(
         raise e
 
 
-# -------------------------------------------------
-# 🔹 Safe Float Conversion (Handles OCR Errors)
-# -------------------------------------------------
 
 def _safe_float(value):
     if value is None:
@@ -105,20 +95,17 @@ def _safe_float(value):
         return None
 
 
-# -------------------------------------------------
-# 🔹 Flexible Date Parsing
-# -------------------------------------------------
 
 def _parse_date(date_str):
     if not date_str:
         return None
 
     formats = [
-        "%d-%b-%Y",      # 28-Feb-2023
-        "%d/%m/%Y",      # 28/02/2023
-        "%d-%m-%Y",      # 28-02-2023
-        "%Y-%m-%d",      # 2023-02-28
-        "%b %d, %Y",     # Feb 28, 2023
+        "%d-%b-%Y",     
+        "%d/%m/%Y",    
+        "%d-%m-%Y",    
+        "%Y-%m-%d",    
+        "%b %d, %Y",     
     ]
 
     for fmt in formats:

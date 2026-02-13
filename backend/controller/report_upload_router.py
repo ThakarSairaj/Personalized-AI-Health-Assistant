@@ -45,7 +45,7 @@ async def upload_report(
     limited_text = raw_text[:8000]
 
     try:
-        # ✅ Now returns dict directly
+       
         extracted_json = send_text_to_llm(limited_text)
 
     except Exception as e:

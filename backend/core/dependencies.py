@@ -1,3 +1,7 @@
+'''
+backend\core\dependencies
+This is use to handle the session once the user is logged in until user is logged out
+'''
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session

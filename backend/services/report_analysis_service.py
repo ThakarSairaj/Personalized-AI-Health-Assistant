@@ -20,7 +20,6 @@ def analyze_report_question(
     if not question:
         return "Please provide a valid question."
 
-    # Fetch ALL lab data for that user
     results = db.query(ExtractedLabResult)\
         .filter(ExtractedLabResult.user_id == user_id)\
         .order_by(ExtractedLabResult.test_date.asc())\
@@ -29,7 +28,6 @@ def analyze_report_question(
     if not results:
         return "No lab records found."
 
-    # Build full structured history
     summary_text = "Complete Lab History:\n\n"
 
     for r in results:
@@ -40,7 +38,6 @@ def analyze_report_question(
             f"Status: {r.status}\n"
         )
 
-    # Let LLM reason freely
     llm_prompt = f"""
 User question:
 {question}

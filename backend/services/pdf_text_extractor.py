@@ -51,11 +51,9 @@ def is_text_valid(text: str) -> bool:
 
     clean_text = text.strip()
 
-    # Minimum length
     if len(clean_text) < 100:
         return False
 
-    # Lab reports contain many numbers, so lower alphabet threshold
     alphabets = re.findall(r'[A-Za-z]', clean_text)
     ratio = len(alphabets) / len(clean_text)
 
@@ -63,19 +61,16 @@ def is_text_valid(text: str) -> bool:
 
 
 def extract_text_hybrid(file_bytes: bytes) -> str:
-    # 1️⃣ Try selectable text
     text = extract_text_from_pdf(file_bytes)
 
     if is_text_valid(text):
         return text
 
-    # 2️⃣ Fallback to OCR
     ocr_text = extract_text_from_ocr(file_bytes)
 
     if is_text_valid(ocr_text):
         return ocr_text
 
-    # 3️⃣ If both fail
     return ""
 
 
