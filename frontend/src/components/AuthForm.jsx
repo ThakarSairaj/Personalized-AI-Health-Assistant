@@ -16,16 +16,29 @@ const handleLogin = async (e) => {
   try {
     const res = await loginUser(loginData)
 
-    // 1️⃣ Store user_id
-    localStorage.setItem('user_id', res.user_id)
+   
 
-    // 2️⃣ Redirect to Streamlit chat
-    window.location.href = `http://localhost:8501?user_id=${res.user_id}`
+    const token = res.access_token
+    const userId = res.user_id
+
+    if (!token) {
+      throw new Error("Token not received from backend")
+    }
+
+    localStorage.setItem('access_token', token)
+    localStorage.setItem('user_id', userId)
+
+    // 🔥 Redirect with token
+    window.location.href = `http://localhost:8501?user_id=${userId}&token=${token}`
 
   } catch (err) {
+    
     alert(err.message || "Login failed")
   }
 }
+
+
+
 
 
   return (
