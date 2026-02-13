@@ -3,7 +3,7 @@ import { uploadPdf } from "../services/api"
 
 const UploadReport = () => {
   const [file, setFile] = useState(null)
-  const [text, setText] = useState("")
+  const [message, setMessage] = useState("")
   const [loading, setLoading] = useState(false)
 
   const handleUpload = async () => {
@@ -15,7 +15,7 @@ const UploadReport = () => {
     try {
       setLoading(true)
       const res = await uploadPdf(file)
-      setText(res.text)
+      setMessage(`${res.message}, Report ID: ${res.report_id}`)
     } catch (err) {
       alert(err.message)
     } finally {
@@ -39,12 +39,10 @@ const UploadReport = () => {
         {loading ? "Processing..." : "Upload & Extract"}
       </button>
 
-      {text && (
+      {message && (
         <>
-          <h3>Extracted Text</h3>
-          <pre style={{ whiteSpace: "pre-wrap" }}>
-            {text}
-          </pre>
+          <h3>Result</h3>
+          <p>{message}</p>
         </>
       )}
     </div>
