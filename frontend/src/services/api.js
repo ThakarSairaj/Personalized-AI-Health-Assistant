@@ -46,19 +46,26 @@ export const submitHealthInfo = async (healthData) => {
 
 // ================== PDF Extractor ===============
 export const uploadPdf = async (file) => {
+  const token = localStorage.getItem("access_token")
+  if (!token) throw new Error("User not logged in")
+
   const formData = new FormData()
   formData.append("file", file)
 
-  const res = await fetch("http://127.0.0.1:8000/pdf/extract", {
+  const res = await fetch("http://127.0.0.1:8000/upload-report", {
     method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`, // <-- this is required!
+    },
     body: formData,
   })
 
   const result = await res.json()
-
   if (!res.ok) {
     throw new Error(result.detail || "PDF extraction failed")
   }
 
   return result
 }
+
+
