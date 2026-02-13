@@ -83,9 +83,9 @@ Medical Report Text:
     )
 
     content = response.choices[0].message.content.strip()
-    print("===== LLM RAW OUTPUT =====")
-    print(content)
-    print("===========================")
+    # print("===== LLM RAW OUTPUT =====")
+    # print(content)
+    # print("===========================")
     try:
         return json.loads(content)
     except Exception:
