@@ -1,0 +1,281 @@
+/* RESET */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/*  PREVENT HORIZONTAL SCROLL */
+html, body {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.landing {
+  font-family: "Poppins", sans-serif;
+  color: #fff;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* NAVBAR */
+.navbar {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  padding: 20px 5vw;   /*  responsive padding */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10;
+  max-width: 100%;
+}
+
+.logo {
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.nav-buttons {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+/* HERO SECTION */
+.hero {
+  height: 100vh;
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+
+  background-color: #0f1f3d;
+
+  background-image: url("/ai-health-bg.png");
+  background-size: contain;
+  background-position: right center;
+  background-repeat: no-repeat;
+
+  display: flex;
+  align-items: center;
+  padding: 120px 5vw 0 5vw;  /*  responsive padding */
+  overflow-x: hidden;
+}
+
+/* OVERLAY */
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    rgba(20, 60, 120, 0.85) 30%,
+    rgba(20, 60, 120, 0.6) 55%,
+    rgba(20, 60, 120, 0.2) 85%
+  );
+}
+
+/* HERO CONTENT */
+.hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 600px;
+}
+
+.hero-content h1 {
+  font-size: 54px;
+  font-weight: 800;
+  margin-bottom: 20px;
+  line-height: 1.2;
+}
+
+.hero-content p {
+  font-size: 18px;
+  margin-bottom: 30px;
+  line-height: 1.6;
+  opacity: 0.95;
+}
+
+/* HERO BUTTONS */
+.hero-buttons {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+/* BUTTONS */
+button {
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.btn-primary {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  padding: 12px 28px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.btn-primary:hover {
+  background: #1d4ed8;
+}
+
+.btn-outline {
+  background: transparent;
+  border: 2px solid #fff;
+  color: #fff;
+  padding: 10px 26px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.btn-outline:hover {
+  background: rgba(255,255,255,0.15);
+}
+
+.btn-light {
+  background: #fff;
+  color: #2563eb;
+  border: none;
+  padding: 12px 28px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.btn-light:hover {
+  transform: translateY(-2px);
+}
+
+.btn-gold {
+  background: #facc15;
+  color: #111;
+  padding: 14px 32px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+}
+
+.btn-gold:hover {
+  background: #eab308;
+}
+
+/* FEATURES */
+.features {
+  background: #f9fafc;
+  color: #111;
+  padding: 100px 5vw;  /*  responsive padding */
+  text-align: center;
+  width: 100%;
+  max-width: 100%;
+}
+
+.features h2 {
+  font-size: 34px;
+  margin-bottom: 60px;
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 30px;
+}
+
+.feature-card {
+  background: #fff;
+  padding: 35px 25px;
+  border-radius: 16px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
+  transition: 0.3s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-8px);
+}
+
+.feature-card span {
+  font-size: 40px;
+}
+
+.feature-card h3 {
+  margin-top: 15px;
+  font-size: 18px;
+}
+
+.feature-card p {
+  font-size: 14px;
+  color: #555;
+  margin-top: 10px;
+}
+
+/* CTA */
+.cta {
+  background: linear-gradient(90deg, #2563eb, #1e3a8a);
+  text-align: center;
+  padding: 100px 5vw;
+  width: 100%;
+  max-width: 100%;
+}
+
+.cta h2 {
+  font-size: 30px;
+  margin-bottom: 25px;
+}
+
+/* FOOTER */
+footer {
+  background: #111827;
+  text-align: center;
+  padding: 20px;
+  font-size: 14px;
+  width: 100%;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+
+  .hero {
+    padding: 120px 5vw 0 5vw;
+    background-size: contain;
+    background-position: center bottom;
+    text-align: center;
+    justify-content: center;
+  }
+
+  .hero-content {
+    max-width: 100%;
+  }
+
+  .hero-content h1 {
+    font-size: 38px;
+  }
+
+  .hero-buttons {
+    justify-content: center;
+  }
+
+  .feature-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+
+  .feature-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-content h1 {
+    font-size: 30px;
+  }
+
+  .hero-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .hero-buttons button {
+    width: 100%;
+  }
+}
