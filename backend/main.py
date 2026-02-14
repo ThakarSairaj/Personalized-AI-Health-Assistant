@@ -7,7 +7,7 @@ from controller.user_controller import router as user_router
 from controller.health_basic_details_controller import router as health_router
 from controller.auth import router as auth_router
 from controller.medical_report_controller import router as report_router
-from backend.controller.report_upload_router import router as pdf_router
+from controller.report_upload_router import router as pdf_router
 from controller.report_analysis_routes import router as report_question_router
 
 app = FastAPI()
