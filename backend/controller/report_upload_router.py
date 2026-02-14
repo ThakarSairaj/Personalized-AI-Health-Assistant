@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from database_con.database import session
 from typing import Annotated
 
-from backend.services.pdf_text_extractor import extract_text_hybrid
+from services.pdf_text_extractor import extract_text_hybrid
 from services.medical_report_parser import send_text_to_llm
 from services.report_storage_service import save_report_to_db
 
