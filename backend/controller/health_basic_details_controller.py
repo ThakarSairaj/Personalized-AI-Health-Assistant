@@ -45,3 +45,4 @@ def userHealthDetails(
     db.add(db_health)
     db.commit()
     db.refresh(db_health)
+    return {"message": "Health info saved successfully!"}
