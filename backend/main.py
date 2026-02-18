@@ -9,6 +9,7 @@ from controller.auth import router as auth_router
 from controller.medical_report_controller import router as report_router
 from controller.report_upload_router import router as pdf_router
 from controller.report_analysis_routes import router as report_question_router
+from controller.chat_router import router as chat_router
 
 app = FastAPI()
 
@@ -28,3 +29,4 @@ app.include_router(auth_router)
 app.include_router(report_router)
 app.include_router(pdf_router)
 app.include_router(report_question_router)
+app.include_router(chat_router)
