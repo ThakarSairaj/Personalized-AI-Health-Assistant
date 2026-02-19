@@ -7,13 +7,13 @@ import re
 import json
 import requests
 from .module2_1 import KbManager
-
+import os
 
 # =====================================================
 # 🔐 OPENROUTER CONFIGURATION
 # =====================================================
 
-OPENROUTER_API_KEY = "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"
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 
@@ -92,8 +92,10 @@ def generate_medical_response(
     initial_query: str,
     conversation_context: str,
     user_id: str,
-    kb_manager: KbManager
+    kb_manager: KbManager,
+    force_final: bool = False
 ):
+
 
     kb_results = kb_manager.semantic_search(user_id, initial_query, top_k=3)
     kb_context = "\n".join(
@@ -101,40 +103,89 @@ def generate_medical_response(
     ) if kb_results else ""
 
     system_prompt = """
-You are a medical triage assistant.
+You are a calm and professional medical doctor conducting a triage conversation.
+
+Conversation style:
+- Be natural and conversational.
+- Sound like a real doctor, not a checklist.
+- Briefly acknowledge patient answers when appropriate.
+- Ask one question at a time.
+- Keep questions concise but natural.
+- Avoid robotic tone.
+
+Clinical behavior:
+- Ask relevant follow-up questions logically.
+- Do not repeat already answered information.
+- Build questions based on previous responses.
+- Avoid unnecessary questions.
+
+Final response style:
+- Use simple, reassuring language.
+- Be concise but helpful.
+- Do not use medical jargon.
+- Provide clear next steps.
+- Include when to seek urgent care.
+- Mention appropriate doctor type.
+
 You MUST respond ONLY with valid JSON.
-No explanations.
 No markdown.
 No extra text.
 Return exactly one JSON object.
 """
 
+
     user_prompt = f"""
-Conversation so far:
-{conversation_context}
+        Conversation so far:
+        {conversation_context}
 
-Relevant patient background:
-{kb_context}
+        Relevant patient background:
+        {kb_context}
 
-Initial query:
-{initial_query}
+        Initial query:
+        {initial_query}
 
-INSTRUCTIONS:
+        INSTRUCTIONS:
 
-1. If user changed topic away from medical issue:
-{{ "type": "reset", "content": "It seems you changed topic. Let's focus on your medical concern." }}
+        1. If user changed topic away from medical issue:
+        {{ "type": "reset", "content": "It seems you changed topic. Let's focus on your medical concern." }}
 
-2. If more information is needed:
-{{ "type": "question", "content": "Your clarifying question here?" }}
+        2. If more information is needed:
+        {{ "type": "question", "content": "Short clarifying medical question here." }}
 
-3. If sufficient information:
-{{ "type": "final", "content": "Two paragraphs medical advice here." }}
+        3. If sufficient information:
+        Return EXACTLY in this structure:
 
-If giving final:
-- EXACTLY 2 paragraphs
-- Each paragraph 3–4 sentences
-- No bullet points
-"""
+        {{
+          "type": "final",
+          "content": "Possible Cause:
+        <short and simple condition name>
+
+        Why This Might Be It:
+        <1-2 short simple sentences>
+
+        What You Can Do Now:
+        - <simple safe home remedy>
+        - <another safe remedy>
+        - <lifestyle advice>
+
+        See a Doctor If:
+        - <clear warning sign 1>
+        - <clear warning sign 2>
+
+        Doctor Type:
+        <specialist name in simple terms>"
+        }}
+
+        Rules for final:
+        - Keep total response under 150 words.
+        - Use simple and reassuring language.
+        - Avoid complex medical terms.
+        - Do not restate symptoms as diagnosis.
+        - Keep it natural and conversational.
+
+        - Be concise.
+        """
+
 
     raw = _call_llm_api(system_prompt, user_prompt)
     cleaned = remove_emoji(raw.strip())
