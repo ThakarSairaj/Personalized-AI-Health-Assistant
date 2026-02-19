@@ -59,10 +59,8 @@ def chat(request: ChatRequest):
         session["initial_query"] = user_input
 
     # Store user message
-    conv_mgr.conversation_history.append({
-        "question": "User",
-        "answer": user_input
-    })
+    conv_mgr.add_exchange("User", user_input)
+
 
     # Call unified LLM engine
     response_data = generate_medical_response(
@@ -77,11 +75,32 @@ def chat(request: ChatRequest):
 
     # Handle response types
     if response_type == "question":
-        conv_mgr.conversation_history.append({
-            "question": "Assistant",
-            "answer": response_content
-        })
-        return ChatResponse(type="question", content=response_content)
+
+    # If we can still ask questions, allow it
+        if conv_mgr.can_ask_more_questions():
+            conv_mgr.add_exchange("Assistant", response_content)
+            return ChatResponse(type="question", content=response_content)
+
+    # Otherwise force final assessment
+        else:
+            conv_mgr.stage = "concluded"
+
+            forced_response = generate_medical_response(
+                session["initial_query"],
+                conv_mgr.get_conversation_context(),
+                user_id,
+                kb_manager,
+                force_final=True
+            )
+
+            final_content = forced_response.get("content", "")
+
+            conv_mgr.add_exchange("Assistant", final_content)
+
+            return ChatResponse(type="final", content=final_content)
+
+
+
 
     elif response_type == "reset":
         conv_mgr.reset()
@@ -90,8 +109,7 @@ def chat(request: ChatRequest):
 
     else:  # final
         conv_mgr.stage = "concluded"
-        conv_mgr.conversation_history.append({
-            "question": "Assistant",
-            "answer": response_content
-        })
+        conv_mgr.add_exchange("Assistant", response_content)
         return ChatResponse(type="final", content=response_content)
+
+
