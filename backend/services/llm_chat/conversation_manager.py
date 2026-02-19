@@ -1,7 +1,3 @@
-'''
-Docstring for backend.services.llm_chat.conversation_manager
-keeps track of the previous question and answer as well and count the question and decides when to stop asking questions
-'''
 # conversation_manager.py
 from typing import List, Dict, Optional
 
@@ -15,13 +11,18 @@ class ConversationManager:
         self.gathered_symptoms: List[str] = []
         self.stage = "initial"  # initial, questioning, diagnosing, concluded
     
-    def add_exchange(self, question: str, answer: str):
-        """Add a Q&A pair to conversation history"""
+    def add_exchange(self, speaker: str, message: str):
+        """Add a message to conversation history"""
+
         self.conversation_history.append({
-            "question": question,
-            "answer": answer
+            "speaker": speaker,
+            "message": message
         })
-        self.question_count += 1
+
+        # Only count assistant medical questions
+        if speaker == "Assistant" and self.stage != "concluded":
+            self.question_count += 1
+
     
     def add_symptom(self, symptom: str):
         """Add identified symptom to list"""
@@ -37,8 +38,8 @@ class ConversationManager:
         context = f"Questions asked so far: {self.question_count}/{self.max_questions}\n\n"
         context += "Conversation history:\n"
         for i, exchange in enumerate(self.conversation_history, 1):
-            context += f"Q{i}: {exchange['question']}\n"
-            context += f"A{i}: {exchange['answer']}\n\n"
+            context += f"{exchange['speaker']}: {exchange['message']}\n"
+
         
         if self.gathered_symptoms:
             context += f"Gathered symptoms: {', '.join(self.gathered_symptoms)}\n"
