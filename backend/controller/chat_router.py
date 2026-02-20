@@ -1,22 +1,19 @@
+#chat_router.py
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Dict
-from services.llm_chat.module2_1 import KbManager
 from services.llm_chat.conversation_manager import ConversationManager
 from services.llm_chat.llm_utils import generate_medical_response
+from services.llm_chat.rag_service import save_symptom
+from services.llm_chat.llm_utils import extract_condition
+from datetime import datetime
 
 router = APIRouter()
 
-# ======================================================
-# In-memory session storage
-# ======================================================
+# In-memory sessions
 user_sessions: Dict[str, dict] = {}
 
-kb_manager = KbManager()
 
-# ======================================================
-# Request / Response Schema
-# ======================================================
 class ChatRequest(BaseModel):
     user_id: str
     message: str
@@ -27,9 +24,6 @@ class ChatResponse(BaseModel):
     content: str
 
 
-# ======================================================
-# Main Chat Endpoint
-# ======================================================
 @router.post("/chat", response_model=ChatResponse)
 def chat(request: ChatRequest):
 
@@ -39,77 +33,82 @@ def chat(request: ChatRequest):
     if not user_input:
         raise HTTPException(status_code=400, detail="Empty message")
 
-    # Initialize session if new user
+    # Initialize session if new
     if user_id not in user_sessions:
         user_sessions[user_id] = {
             "conv_mgr": ConversationManager(),
-            "initial_query": ""
+            "recurrence_detected": False
         }
 
     session = user_sessions[user_id]
     conv_mgr = session["conv_mgr"]
 
-    # Reset if conversation concluded
+    # Reset if previous conversation ended
     if conv_mgr.stage == "concluded":
         conv_mgr.reset()
-        session["initial_query"] = ""
+        session["recurrence_detected"] = False # Check This *********
 
-    # Store initial query only once
-    if not session["initial_query"]:
-        session["initial_query"] = user_input
+    
 
-    # Store user message
+    # Add user message ONCE
     conv_mgr.add_exchange("User", user_input)
 
+###############
 
-    # Call unified LLM engine
-    response_data = generate_medical_response(
-        session["initial_query"],
+# Generate LLM response
+    result = generate_medical_response(
         conv_mgr.get_conversation_context(),
         user_id,
-        kb_manager
-    )
+        session["recurrence_detected"]
+)
+
+    response_data = result["response"]
+
+# Update recurrence flag in session
+    if result["recurrence_detected"]:
+        session["recurrence_detected"] = True
 
     response_type = response_data.get("type", "final")
     response_content = response_data.get("content", "")
 
-    # Handle response types
     if response_type == "question":
-
-    # If we can still ask questions, allow it
-        if conv_mgr.can_ask_more_questions():
-            conv_mgr.add_exchange("Assistant", response_content)
-            return ChatResponse(type="question", content=response_content)
-
-    # Otherwise force final assessment
-        else:
-            conv_mgr.stage = "concluded"
-
-            forced_response = generate_medical_response(
-                session["initial_query"],
-                conv_mgr.get_conversation_context(),
-                user_id,
-                kb_manager,
-                force_final=True
-            )
-
-            final_content = forced_response.get("content", "")
-
-            conv_mgr.add_exchange("Assistant", final_content)
-
-            return ChatResponse(type="final", content=final_content)
-
-
-
-
-    elif response_type == "reset":
-        conv_mgr.reset()
-        session["initial_query"] = ""
-        return ChatResponse(type="reset", content=response_content)
-
-    else:  # final
-        conv_mgr.stage = "concluded"
         conv_mgr.add_exchange("Assistant", response_content)
-        return ChatResponse(type="final", content=response_content)
+        return ChatResponse(type="question", content=response_content)
+
+# Final response
+    conv_mgr.stage = "concluded"
+    conv_mgr.add_exchange("Assistant", response_content)
+
+###########
 
 
+
+
+
+
+    
+
+    # Save structured memory after conclusion
+    condition = extract_condition(response_content)
+
+    conversation_text = conv_mgr.get_conversation_context()
+
+    # Extract only user statements
+    user_lines = [
+    line.replace("User: ", "")
+    for line in conversation_text.split("\n")
+    if line.startswith("User:")
+]
+
+    symptoms_text = " ".join(user_lines)
+
+    structured_memory = f"""
+    Medical Record
+    Condition: {condition}
+    Symptoms: {symptoms_text}
+    Date: {datetime.now().strftime("%Y-%m-%d")}
+    """
+
+    embedding_text = f"{condition}. Symptoms: {symptoms_text}"
+    save_symptom(user_id, embedding_text)
+    return ChatResponse(type="final", content=response_content)
