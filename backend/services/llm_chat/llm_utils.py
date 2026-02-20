@@ -6,8 +6,12 @@ call the llm via openrouter, pass the information of the user and receives the o
 import re
 import json
 import requests
-from .module2_1 import KbManager
+# from .module2_1 import KbManager
 import os
+from .rag_service import retrieve_similar
+
+
+
 
 # =====================================================
 # 🔐 OPENROUTER CONFIGURATION
@@ -89,18 +93,44 @@ def _call_llm_api(system_prompt: str, user_prompt: str) -> str:
 # =====================================================
 
 def generate_medical_response(
-    initial_query: str,
     conversation_context: str,
     user_id: str,
-    kb_manager: KbManager,
-    force_final: bool = False
+    recurrence_flag: bool
+    
 ):
 
 
-    kb_results = kb_manager.semantic_search(user_id, initial_query, top_k=3)
-    kb_context = "\n".join(
-        f"- {item['document']}" for item in kb_results
-    ) if kb_results else ""
+   # Retrieve only at early stage of conversation
+    if conversation_context.count("User:") <= 1:
+
+    # Safely extract the latest USER message
+        lines = conversation_context.strip().split("\n")
+        latest_user_line = ""
+
+        for line in reversed(lines):
+            if line.startswith("User:"):
+                latest_user_line = line.replace("User: ", "")
+                break
+
+        retrieved_memories = retrieve_similar(
+            user_id=user_id,
+            query=latest_user_line,
+            top_k=3
+        )
+
+    else:
+        retrieved_memories = []
+        
+    recurrence_detected = recurrence_flag or (len(retrieved_memories) > 0)
+    if retrieved_memories:
+        kb_context = "Previous relevant medical records:\n"
+        for i, doc in enumerate(retrieved_memories, 1):
+            kb_context += f"{i}. {doc}\n"
+    else:
+        kb_context = "No relevant past medical history."
+
+
+
 
     system_prompt = """
 You are a calm and professional medical doctor conducting a triage conversation.
@@ -119,6 +149,13 @@ Clinical behavior:
 - Build questions based on previous responses.
 - Avoid unnecessary questions.
 
+Memory handling:
+- If "Recurrence Detected" is YES,
+  you MUST acknowledge that the patient had a similar episode before.
+- Mention it in one short natural sentence BEFORE giving the final explanation.
+- Do NOT ignore this instruction.
+- If "Recurrence Detected" is NO, do not mention past history.
+
 Final response style:
 - Use simple, reassuring language.
 - Be concise but helpful.
@@ -135,56 +172,62 @@ Return exactly one JSON object.
 
 
     user_prompt = f"""
-        Conversation so far:
-        {conversation_context}
+Conversation so far:
+{conversation_context}
 
-        Relevant patient background:
-        {kb_context}
+Relevant patient background:
+{kb_context}
 
-        Initial query:
-        {initial_query}
+Recurrence Detected: {"YES" if recurrence_detected else "NO"}
 
-        INSTRUCTIONS:
+INSTRUCTIONS:
 
-        1. If user changed topic away from medical issue:
-        {{ "type": "reset", "content": "It seems you changed topic. Let's focus on your medical concern." }}
+1. If user changed topic away from medical issue:
+{{ "type": "reset", "content": "It seems you changed topic. Let's focus on your medical concern." }}
 
-        2. If more information is needed:
-        {{ "type": "question", "content": "Short clarifying medical question here." }}
+2. If more information is needed:
+{{ "type": "question", "content": "Short clarifying medical question here." }}
 
-        3. If sufficient information:
-        Return EXACTLY in this structure:
+3. If sufficient information:
 
-        {{
-          "type": "final",
-          "content": "Possible Cause:
-        <short and simple condition name>
+If Recurrence Detected is YES,
+begin the content with ONE short natural sentence acknowledging
+that the patient had a similar episode before.
 
-        Why This Might Be It:
-        <1-2 short simple sentences>
+Then continue EXACTLY in this structure:
 
-        What You Can Do Now:
-        - <simple safe home remedy>
-        - <another safe remedy>
-        - <lifestyle advice>
+{{
+  "type": "final",
+  "content": "
+<Optional recurrence sentence if Recurrence Detected is YES>
 
-        See a Doctor If:
-        - <clear warning sign 1>
-        - <clear warning sign 2>
+Possible Cause:
+<short and simple condition name>
 
-        Doctor Type:
-        <specialist name in simple terms>"
-        }}
+Why This Might Be It:
+<1-2 short simple sentences>
 
-        Rules for final:
-        - Keep total response under 150 words.
-        - Use simple and reassuring language.
-        - Avoid complex medical terms.
-        - Do not restate symptoms as diagnosis.
-        - Keep it natural and conversational.
+What You Can Do Now:
+- <simple safe home remedy>
+- <another safe remedy>
+- <lifestyle advice>
 
-        - Be concise.
-        """
+See a Doctor If:
+- <clear warning sign 1>
+- <clear warning sign 2>
+
+Doctor Type:
+<specialist name in simple terms>"
+}}
+
+Rules for final:
+- Keep total response under 150 words.
+- Use simple and reassuring language.
+- Avoid complex medical terms.
+- Do not restate symptoms as diagnosis.
+- Keep it natural and conversational.
+- Be concise.
+"""
 
 
     raw = _call_llm_api(system_prompt, user_prompt)
@@ -196,9 +239,19 @@ Return exactly one JSON object.
         start = cleaned.find("{")
         end = cleaned.rfind("}") + 1
         json_text = cleaned[start:end]
-        return json.loads(json_text)
+        return {
+        "response": json.loads(json_text),
+        "recurrence_detected": recurrence_detected
+        }
     except Exception:
         return {
+        "response": {
             "type": "final",
             "content": "I'm sorry, I couldn't process that properly. Please try again."
-        }
+        },
+        "recurrence_detected": recurrence_detected
+    }
+
+def extract_condition(text: str) -> str:
+    match = re.search(r"Possible Cause:\s*(.+)", text)
+    return match.group(1).strip() if match else "Unknown"
